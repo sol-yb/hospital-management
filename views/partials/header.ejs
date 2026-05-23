@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title || 'Hospital Management System' %></title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <%- typeof extraStyles !== 'undefined' ? extraStyles : '' %>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="site-header">
+        <a class="brand-link" href="/">
+          <span class="brand-mark">Hospital+</span>
+          <span class="brand-text">Management System</span>
+        </a>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/register" class="nav-link">Register</a>
+          <a href="/login" class="nav-link">Login</a>
+        </nav>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+          🌙
+        </button>
+      </header>
+      <main class="page-content">

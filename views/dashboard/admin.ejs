@@ -1,0 +1,152 @@
+<%- include('../partials/header', { title: 'Admin Dashboard - Hospital Management', extraStyles: '<link rel="stylesheet" href="/css/admin.css" />' }) %>
+
+  <section class="dashboard-shell">
+    <div class="overview-grid">
+      <article class="metric-card">
+        <p class="metric-label">Active appointments</p>
+        <strong><span id="confirmedCount"><%= dashboard.stats.confirmedAppointments %></span></strong>
+        <span class="metric-note">Today: <%= dashboard.stats.todayAppointments %></span>
+      </article>
+      <article class="metric-card">
+        <p class="metric-label">Pending approvals</p>
+        <strong><span id="pendingCount"><%= dashboard.stats.pendingAppointments %></span></strong>
+        <span class="metric-note">Overdue invoices: <%= dashboard.stats.overdueInvoices %></span>
+      </article>
+      <article class="metric-card">
+        <p class="metric-label">Patient profiles</p>
+        <strong><%= dashboard.stats.totalPatients %></strong>
+        <span class="metric-note">Doctors: <%= dashboard.stats.totalDoctors %></span>
+      </article>
+      <article class="metric-card">
+        <p class="metric-label">Invoices issued</p>
+        <strong><%= dashboard.stats.totalInvoices %></strong>
+        <span class="metric-note">Users: <%= dashboard.stats.totalUsers %></span>
+      </article>
+    </div>
+
+    <div class="action-panel">
+      <article class="action-card">
+        <span class="action-label">Appointments</span>
+        <h3>Manage bookings</h3>
+        <p>Jump directly to appointment scheduling, rescheduling, and status tracking.</p>
+        <a href="#upcoming" class="btn btn-secondary btn-small">Go to appointments</a>
+      </article>
+      <article class="action-card">
+        <span class="action-label">Patients</span>
+        <h3>Review profiles</h3>
+        <p>Open patient records and clinical history for quick follow-up.</p>
+        <a href="#" class="btn btn-secondary btn-small">View patients</a>
+      </article>
+      <article class="action-card">
+        <span class="action-label">Billing</span>
+        <h3>Review invoices</h3>
+        <p>Track invoicing, overdue balances, and payment workflows.</p>
+        <a href="#billing" class="btn btn-secondary btn-small">View billing</a>
+      </article>
+      <article class="action-card">
+        <span class="action-label">Reports</span>
+        <h3>Export insights</h3>
+        <p>Generate operational summaries and performance reports instantly.</p>
+        <a href="#" class="btn btn-secondary btn-small">Launch reports</a>
+      </article>
+    </div>
+
+    <div class="dashboard-grid">
+      <article class="chart-card">
+        <div class="section-header">
+          <div>
+            <p class="section-label">Appointment status</p>
+            <h2>Real-time appointment pulse</h2>
+          </div>
+        </div>
+        <div class="status-chart">
+          <div class="status-row">
+            <span>Confirmed</span>
+            <div class="bar-track">
+              <span id="chartConfirmed" class="bar-fill" data-current="<%= dashboard.chartData.confirmed %>" style="width: <%= dashboard.chartData.confirmed %>%;"></span>
+            </div>
+            <strong><%= dashboard.chartData.confirmed %></strong>
+          </div>
+          <div class="status-row">
+            <span>Pending</span>
+            <div class="bar-track">
+              <span id="chartPending" class="bar-fill soft" data-current="<%= dashboard.chartData.pending %>" style="width: <%= dashboard.chartData.pending %>%;"></span>
+            </div>
+            <strong><%= dashboard.chartData.pending %></strong>
+          </div>
+          <div class="status-row">
+            <span>Cancelled</span>
+            <div class="bar-track">
+              <span id="chartCancelled" class="bar-fill danger" data-current="<%= dashboard.chartData.cancelled %>" style="width: <%= dashboard.chartData.cancelled %>%;"></span>
+            </div>
+            <strong><%= dashboard.chartData.cancelled %></strong>
+          </div>
+        </div>
+
+        <div class="trend-chart-card">
+          <div class="section-header">
+            <div>
+              <p class="section-label">Trend</p>
+              <h3>Appointment volume</h3>
+            </div>
+          </div>
+          <div class="trend-chart-container">
+            <canvas id="adminTrendChart" width="520" height="220"
+              data-confirmed="<%= dashboard.chartData.confirmed %>"
+              data-pending="<%= dashboard.chartData.pending %>"
+              data-cancelled="<%= dashboard.chartData.cancelled %>">
+            </canvas>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item confirmed">Confirmed</span>
+            <span class="legend-item pending">Pending</span>
+            <span class="legend-item cancelled">Cancelled</span>
+          </div>
+        </div>
+
+        <div class="upcoming-card" id="upcoming">
+          <div class="section-header">
+            <div>
+              <p class="section-label">Upcoming</p>
+              <h3>Next scheduled appointments</h3>
+            </div>
+          </div>
+          <ul class="appointment-list">
+            <% dashboard.upcomingAppointments.forEach((appointment) => { %>
+              <li>
+                <strong><%= appointment.patientName %></strong>
+                <p><%= appointment.doctorName %> • <%= appointment.department %></p>
+                <small><%= new Date(appointment.scheduledAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) %></small>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      </article>
+
+      <article class="live-card">
+        <div class="section-header">
+          <div>
+            <p class="section-label">Live operations</p>
+            <h2>Activity feed</h2>
+          </div>
+        </div>
+        <div class="live-toast" id="liveUpdateToast">Connected to live appointment updates.</div>
+        <ul class="feed-list" id="liveActivityFeed">
+          <% dashboard.recentActivity.forEach((item) => { %>
+            <li class="feed-item">
+              <span class="feed-time"><%= new Date(item.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %></span>
+              <span class="feed-copy">
+                <strong><%= item.event %></strong> for <%= item.patientName %> with <%= item.doctorName %>
+              </span>
+              <span class="status-pill"><%= item.status %></span>
+            </li>
+          <% }) %>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/admin-dashboard.js" defer></script>
+
+<%- include('../partials/footer') %>
